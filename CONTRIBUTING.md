@@ -10,6 +10,8 @@ Before a substantial change, such as a new workflow, a change to the safety rule
 
 ## Repository layout
 
+The plugin's source is `plugin.yaml` plus its skills. [trilio-agent-plugin-kit](https://github.com/trilioData/trilio-agent-plugin-kit) generates every agent's manifest and MCP file from it; CI fails if a generated file is edited by hand.
+
 | Path | What it is |
 |------|------------|
 | `plugins/site-recovery-kubernetes/plugin.yaml` | The plugin's source: manifest fields and the docs MCP server. **Edit this.** |
@@ -19,24 +21,40 @@ Before a substantial change, such as a new workflow, a change to the safety rule
 | `evals/cases.yaml` | Eval cases: prompts and what a correct answer must do. All must pass before a release. |
 | `scripts/check.sh` | Checks pluginkit doesn't: names, version, docs URL, the skill's rules, the README. |
 
-## Set up and test locally
+## Set up once
 
-You need Python 3.9+ with PyYAML, a checkout of [trilio-agent-plugin-kit](https://github.com/trilioData/trilio-agent-plugin-kit) in `.pluginkit` (see the README), and `jq`. The [Claude Code](https://claude.com/product/claude-code) CLI is optional, but `scripts/check.sh` uses it to validate the plugin when it is installed.
-
-Run the checks:
+You need Python 3.9+, `jq`, and access to the kit repo. The [Claude Code](https://claude.com/product/claude-code) CLI is optional; `scripts/check.sh` also runs `claude plugin validate` when it's installed.
 
 ```bash
-python .pluginkit/pluginkit.py validate .
-python .pluginkit/pluginkit.py generate --check .
-sh scripts/check.sh                  # offline checks
-CHECK_ONLINE=1 sh scripts/check.sh   # also confirms the docs MCP server responds
+git clone git@github.com:trilioData/trilio-agent-plugin-kit.git .pluginkit -b v0.1.0   # git-ignored
+python3 -m pip install pyyaml
 ```
 
-Try your checkout in Claude Code without installing it:
+Use the kit tag that `KIT_REF` in `.github/workflows/ci.yml` pins, so your local checks match CI.
 
-```bash
-claude --plugin-dir ./plugins/site-recovery-kubernetes
-```
+## Validate your changes before committing
+
+Run these from the repo root after every change. Steps 1 and 2 are the same checks CI runs, so if they pass locally, CI's checks pass too.
+
+1. **Regenerate** the manifests and MCP files if you changed `plugin.yaml`:
+   ```bash
+   python3 .pluginkit/pluginkit.py generate .
+   ```
+2. **Run the checks:**
+   ```bash
+   python3 .pluginkit/pluginkit.py validate .              # plugin source, skills, naming rule, no marketplace files
+   python3 .pluginkit/pluginkit.py generate --check .      # generated files match plugin.yaml and weren't edited by hand
+   sh scripts/check.sh                                     # names, version, docs URL, skill rules, README
+   CHECK_ONLINE=1 sh scripts/check.sh                      # also confirms the docs MCP server responds
+   python3 .pluginkit/pluginkit.py package plugins/site-recovery-kubernetes --out dist   # the release zip builds
+   ```
+3. **Try the plugin** in Claude Code without installing it:
+   ```bash
+   claude --plugin-dir ./plugins/site-recovery-kubernetes
+   ```
+   In the session, run `/mcp` and check that `trilio-site-recovery-kubernetes-docs` is connected. Then ask a TSR question, or run `/site-recovery-kubernetes:tsr-guide`, and check that the agent reads and cites the docs.
+4. **If you changed the skill**, run the cases in `evals/cases.yaml` against the old and new skill, as described in [Evaluate the change](#evaluate-the-change).
+5. **Review what you're committing:** `git status` should show the regenerated files next to `plugin.yaml`, and nothing under `.pluginkit/` or `dist/`.
 
 ## Changing the skill
 
@@ -68,16 +86,21 @@ A skill change should demonstrably improve how agents behave. Passing `scripts/c
 
 The version must match everywhere. When you bump it:
 
-1. Update `version` in `plugins/site-recovery-kubernetes/plugin.yaml` and run `python .pluginkit/pluginkit.py generate .`, which updates every agent's manifest.
+1. Update `version` in `plugins/site-recovery-kubernetes/plugin.yaml` and run `python3 .pluginkit/pluginkit.py generate .`, which updates every agent's manifest.
 2. Update `VERSION` in `scripts/check.sh`.
 
 This repo has no marketplace files, and `pluginkit validate` fails if one is added. Claude Code, Codex and Cursor all install from [trilio-agent-marketplace](https://github.com/trilioData/trilio-agent-marketplace).
 
 To release, tag the merged commit `site-recovery-kubernetes/v<version>` and push the tag. The release workflow checks the tag against `plugin.yaml` and publishes a GitHub release whose notes list the pull requests since the previous release. If the release changes something users must act on, such as the install id, a skill name or the docs MCP server, add that to the top of the release notes. The platform group then pins the tag in trilio-agent-marketplace.
 
-If the docs MCP URL changes, follow [Updating the docs URL](README.md#updating-the-docs-url) in the README.
+## Updating the docs URL
 
-## Supporting all four agents
+The TSR docs MCP server's URL is set in three places. If it changes:
+
+1. Update `mcpServers` in `plugins/site-recovery-kubernetes/plugin.yaml`, `DOCS_URL` in `scripts/check.sh`, and the `codex mcp add` command in the README.
+2. Bump the version and regenerate, as in [Changing manifests or releasing a version](#changing-manifests-or-releasing-a-version). `pluginkit generate` rewrites the MCP file for each agent: `.mcp.json` (Claude Code and Cursor) and `mcp.json` (Codex).
+
+## Supporting every agent
 
 Anything you add to the plugin, such as an MCP server, agent or command, has to work in Claude Code, Codex and Cursor. Each agent reads its own manifest and file format. Check each agent's current plugin documentation, and test the agents you can. If an agent can't load the new component from the plugin, document a manual setup step for it in the README, as the README already does for the docs MCP server in Codex.
 
@@ -94,6 +117,6 @@ Anything you add to the plugin, such as an MCP server, agent or command, has to 
   | 🐛 | A bug fix |
 - Keep each pull request to one change. Split unrelated fixes into separate pull requests.
 - Read the complete diff before opening the pull request, including anything an AI tool wrote. You are responsible for what you submit.
-- Run `sh scripts/check.sh` and make sure it passes.
+- Run the steps in [Validate your changes before committing](#validate-your-changes-before-committing) and make sure they pass.
 
 The pull request description should explain the problem, the change and why it's right, how you evaluated it (for skill changes), which checks you ran, and any known limitations.

@@ -184,25 +184,30 @@ check_skill() {
 }
 
 check_docs() {
-	# The README shows the URL in exactly one place, so a URL change has a
-	# single spot to edit there.
+	# The README shows the URL in exactly one place (the Codex fallback), so a
+	# URL change has a single spot to edit there.
 	count=$(grep -oF "$DOCS_URL" README.md 2>/dev/null | wc -l | tr -d ' ')
 	if [ "$count" = 1 ]; then
 		ok "README shows the docs URL once"
 	else
 		fail "README shows the docs URL $count times, want 1"
 	fi
-	for heading in "Claude Code" Codex Cursor "Updating the docs URL"; do
+	for heading in "Claude Code" Codex Cursor; do
 		if grep -qx "### $heading\|## $heading" README.md 2>/dev/null; then
 			ok "README has '$heading'"
 		else
 			fail "README lacks a '$heading' section"
 		fi
 	done
+	if grep -qx "## Updating the docs URL" CONTRIBUTING.md 2>/dev/null; then
+		ok "CONTRIBUTING has 'Updating the docs URL'"
+	else
+		fail "CONTRIBUTING lacks an 'Updating the docs URL' section"
+	fi
 
 	# Codex bundled-MCP support is unverified, so the README gives a manual
 	# fallback.
-	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add"
+	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add trilio-site-recovery-kubernetes-docs --url $DOCS_URL"
 
 	expect_text LICENSE "$(cat LICENSE 2>/dev/null)" "Apache License" "Version 2.0"
 }
