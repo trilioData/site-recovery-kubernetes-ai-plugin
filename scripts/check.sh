@@ -1,14 +1,16 @@
 #!/usr/bin/env sh
-# Checks the invariants that tie the plugin's files together: names, versions,
-# the docs MCP URL, and the rules the skill must carry.
+# Checks what pluginkit doesn't: the generated files carry the right names,
+# version and docs MCP URL, the Cursor and Junie marketplaces point at the
+# plugin, and the skill and README carry the rules they must.
 #
 # Run from the repo root:
 #   sh scripts/check.sh                  # offline checks
 #   CHECK_ONLINE=1 sh scripts/check.sh   # also probes the docs MCP server
 set -u
 
-PLUGIN_NAME="trilio-site-recovery"
-VERSION="0.1.0"
+PLUGIN_NAME="site-recovery-kubernetes"
+VERSION="0.2.0"
+P="plugins/$PLUGIN_NAME"
 MCP_SERVER="trilio-site-recovery-docs"
 DOCS_URL="https://docs-tsr.trilio.io/api/mcp/mark-reid/trilio-site-recovery-for-kubernetes"
 
@@ -48,41 +50,35 @@ expect() {
 }
 
 check_manifests() {
-	for f in $(find .claude-plugin .cursor-plugin .agents .junie-extension plugin -name '*.json' 2>/dev/null); do
+	for f in $(find .cursor-plugin .junie-extension plugins -name '*.json' 2>/dev/null); do
 		jq empty "$f" 2>/dev/null || fail "$f: invalid JSON"
 	done
 
-	for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json plugin/.cursor-plugin/plugin.json plugin/extension.json; do
+	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json $P/extension.json; do
 		expect "$f" .name "$PLUGIN_NAME"
 	done
-	for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json plugin/.cursor-plugin/plugin.json; do
+	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json; do
 		expect "$f" .version "$VERSION"
 		expect "$f" .skills ./skills/
 	done
-	expect plugin/.cursor-plugin/plugin.json .mcpServers ./.mcp.json
-	expect plugin/.codex-plugin/plugin.json .mcpServers ./mcp.json
+	expect $P/.cursor-plugin/plugin.json .mcpServers ./.mcp.json
+	expect $P/.codex-plugin/plugin.json .mcpServers ./mcp.json
 
-	expect .claude-plugin/marketplace.json .name trilio-claude-marketplace
+	# Claude Code and Codex install from trilio-agent-marketplace. Cursor and
+	# Junie install from this repo until that catalog covers them.
 	expect .cursor-plugin/marketplace.json .name trilio-cursor-marketplace
-	for f in .claude-plugin/marketplace.json .cursor-plugin/marketplace.json; do
-		expect "$f" '.plugins | length' 1
-		expect "$f" '.plugins[0].name' "$PLUGIN_NAME"
-		expect "$f" '.plugins[0].source' ./plugin
-	done
-
-	expect .agents/plugins/marketplace.json .name trilio-codex-marketplace
-	expect .agents/plugins/marketplace.json '.plugins | length' 1
-	expect .agents/plugins/marketplace.json '.plugins[0].name' "$PLUGIN_NAME"
-	expect .agents/plugins/marketplace.json '.plugins[0].source.path' ./plugin
+	expect .cursor-plugin/marketplace.json '.plugins | length' 1
+	expect .cursor-plugin/marketplace.json '.plugins[0].name' "$PLUGIN_NAME"
+	expect .cursor-plugin/marketplace.json '.plugins[0].source' "./$P"
 
 	expect .junie-extension/marketplace.json .name trilio-junie-marketplace
 	expect .junie-extension/marketplace.json '.extensions | length' 1
 	expect .junie-extension/marketplace.json '.extensions[0].name' "$PLUGIN_NAME"
-	expect .junie-extension/marketplace.json '.extensions[0].source' ./plugin
+	expect .junie-extension/marketplace.json '.extensions[0].source' "./$P"
 	expect .junie-extension/marketplace.json '.extensions[0].version' "$VERSION"
 
 	if command -v claude >/dev/null 2>&1; then
-		for target in . plugin; do
+		for target in "$P"; do
 			if out=$(claude plugin validate "$target" 2>&1); then
 				ok "claude plugin validate $target"
 			else
@@ -99,13 +95,13 @@ $out"
 # and URL.
 check_mcp() {
 	server=".mcpServers[\"$MCP_SERVER\"]"
-	for f in plugin/.mcp.json plugin/mcp.json plugin/mcp/.mcp.json; do
+	for f in $P/.mcp.json $P/mcp.json $P/mcp/.mcp.json; do
 		expect "$f" '.mcpServers | length' 1
 		expect "$f" "$server.url" "$DOCS_URL"
 	done
-	expect plugin/.mcp.json "$server.type" http
-	expect plugin/mcp.json '."$schema"' https://agent-plugins.org/schemas/1.0.0/mcp.schema.json
-	expect plugin/mcp.json "$server.type" streamable-http
+	expect $P/.mcp.json "$server.type" http
+	expect $P/mcp.json '."$schema"' https://agent-plugins.org/schemas/1.0.0/mcp.schema.json
+	expect $P/mcp.json "$server.type" streamable-http
 
 	if [ "${CHECK_ONLINE:-}" = 1 ]; then
 		tools=$(curl -s -m 30 -X POST "$DOCS_URL" \
@@ -121,7 +117,7 @@ check_mcp() {
 	fi
 }
 
-SKILL=plugin/skills/tsr-guide/SKILL.md
+SKILL=$P/skills/tsr-guide/SKILL.md
 
 # frontmatter KEY prints the value of KEY from the skill's frontmatter.
 frontmatter() {

@@ -21,14 +21,14 @@ The plugin is available for Claude Code, Codex, Cursor and Junie.
 
 Run the following commands inside a Claude Code session.
 
-1. Add this repository as a marketplace:
+1. Add the Trilio marketplace:
 ```
-/plugin marketplace add triliodata/tsr-k8s-skill
+/plugin marketplace add trilioData/trilio-agent-marketplace
 ```
 
 2. Install the plugin:
 ```
-/plugin install trilio-site-recovery@trilio-claude-marketplace
+/plugin install site-recovery-kubernetes@trilio
 ```
 
 #### Usage
@@ -36,14 +36,14 @@ Run the following commands inside a Claude Code session.
 Claude Code invokes the skill automatically when a task involves TSR. To invoke it explicitly:
 
 ```
-/trilio-site-recovery:tsr-guide
+/site-recovery-kubernetes:tsr-guide
 ```
 
 #### Updating
 
 ```bash
-claude plugin marketplace update trilio-claude-marketplace
-claude plugin update trilio-site-recovery@trilio-claude-marketplace
+claude plugin marketplace update trilio
+claude plugin update site-recovery-kubernetes@trilio
 ```
 
 Then run `/reload-plugins` in an open session.
@@ -54,14 +54,14 @@ Then run `/reload-plugins` in an open session.
 
 Run the following commands in a terminal.
 
-1. Add this repository as a marketplace:
+1. Add the Trilio marketplace:
 ```
-codex plugin marketplace add triliodata/tsr-k8s-skill
+codex plugin marketplace add trilioData/trilio-agent-marketplace
 ```
 
 2. Install the plugin:
 ```
-codex plugin add trilio-site-recovery@trilio-codex-marketplace
+codex plugin add site-recovery-kubernetes@trilio
 ```
 
 If `codex mcp list` doesn't show the `trilio-site-recovery-docs` server after installing, add it by hand, using the URL from [Updating the docs URL](#updating-the-docs-url):
@@ -75,18 +75,20 @@ codex mcp add trilio-site-recovery-docs --url "<docs URL>"
 Refresh the marketplace and reinstall the plugin so Codex replaces its cached copy:
 
 ```bash
-codex plugin marketplace upgrade trilio-codex-marketplace
-codex plugin remove trilio-site-recovery@trilio-codex-marketplace
-codex plugin add trilio-site-recovery@trilio-codex-marketplace
+codex plugin marketplace upgrade trilio
+codex plugin remove site-recovery-kubernetes@trilio
+codex plugin add site-recovery-kubernetes@trilio
 ```
 
 ### Cursor
 
 #### Installation
 
+Cursor installs from this repository until the Trilio marketplace covers Cursor.
+
 1. Add this repository as a marketplace by running the following command in a terminal:
 ```
-cursor-agent plugin marketplace add https://github.com/triliodata/tsr-k8s-skill
+cursor-agent plugin marketplace add https://github.com/trilioData/site-recovery-kubernetes-ai-plugin
 ```
 
 2. Install the plugin with the `/plugins` command inside a Cursor session.
@@ -105,14 +107,16 @@ Reopen Cursor. If the plugin is still on the previous version, reinstall it with
 
 Run the following commands inside a Junie CLI session.
 
+Junie installs from this repository until the Trilio marketplace covers Junie.
+
 1. Add this repository as a marketplace:
 ```
-/extensions marketplace add triliodata/tsr-k8s-skill
+/extensions marketplace add trilioData/site-recovery-kubernetes-ai-plugin
 ```
 
 2. Install the extension:
 ```
-/extensions install trilio-site-recovery
+/extensions install site-recovery-kubernetes
 ```
 
 If Junie doesn't list the `trilio-site-recovery-docs` MCP server after installing, add it by hand to `.junie/mcp/mcp.json` in your project (or `~/.junie/mcp/mcp.json` for all projects), using the URL from [Updating the docs URL](#updating-the-docs-url):
@@ -130,7 +134,7 @@ If Junie doesn't list the `trilio-site-recovery-docs` MCP server after installin
 #### Updating
 
 ```
-/extensions update trilio-site-recovery
+/extensions update site-recovery-kubernetes
 ```
 
 ## Updating the docs URL
@@ -141,21 +145,22 @@ The TSR docs MCP server is at:
 https://docs-tsr.trilio.io/api/mcp/mark-reid/trilio-site-recovery-for-kubernetes
 ```
 
-If this URL changes, update it in all of these places, then bump the version in every manifest and add a CHANGELOG entry:
+If this URL changes:
 
-- `plugin/.mcp.json` (Claude Code and Cursor)
-- `plugin/mcp.json` (Codex)
-- `plugin/mcp/.mcp.json` (Junie)
-- `DOCS_URL` in `scripts/check.sh`
-- this section
+1. Update `mcpServers` in `plugins/site-recovery-kubernetes/plugin.yaml`, `DOCS_URL` in `scripts/check.sh`, and this section.
+2. Bump the version and regenerate, as in [CONTRIBUTING.md](CONTRIBUTING.md#changing-manifests-or-releasing-a-version). `pluginkit generate` rewrites the MCP file for each agent: `.mcp.json` (Claude Code and Cursor), `mcp.json` (Codex) and `mcp/.mcp.json` (Junie).
 
 ## Development
 
-`scripts/check.sh` checks that the manifests, MCP files, skill and README stay consistent, and runs `claude plugin validate` when the `claude` CLI is installed. It needs `jq`.
+The plugin's source is `plugins/site-recovery-kubernetes/plugin.yaml` plus its skills. [trilio-agent-plugin-kit](https://github.com/trilioData/trilio-agent-plugin-kit) generates every agent's manifest and MCP file from it; CI fails if a generated file is edited by hand.
 
 ```bash
-sh scripts/check.sh                  # offline checks
-CHECK_ONLINE=1 sh scripts/check.sh   # also confirms the docs MCP server responds
+git clone git@github.com:trilioData/trilio-agent-plugin-kit.git .pluginkit -b v0.1.0
+pip install pyyaml
+python .pluginkit/pluginkit.py generate .    # after editing plugin.yaml or the skill
+python .pluginkit/pluginkit.py validate .
+sh scripts/check.sh                          # skill, README and marketplace checks; needs jq
+CHECK_ONLINE=1 sh scripts/check.sh           # also confirms the docs MCP server responds
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to change and evaluate the plugin.
