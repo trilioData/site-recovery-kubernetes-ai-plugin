@@ -20,7 +20,7 @@ targets: [claude-code, codex, cursor]
 # The official TSR docs, generated from the TSR source. If this URL changes,
 # see "Updating the docs URL" in the README.
 mcpServers:
-  trilio-site-recovery-kuberentes-docs:
+  trilio-site-recovery-kubernetes-docs:
     url: https://docs-tsr.trilio.io/api/mcp/trilio-site-recovery-for-kubernetes
 
 codex:

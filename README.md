@@ -64,10 +64,10 @@ codex plugin marketplace add trilioData/trilio-agent-marketplace
 codex plugin add site-recovery-kubernetes@trilio
 ```
 
-If `codex mcp list` doesn't show the `trilio-site-recovery-kuberentes-docs` server after installing, add it by hand, using the URL from [Updating the docs URL](#updating-the-docs-url):
+If `codex mcp list` doesn't show the `trilio-site-recovery-kubernetes-docs` server after installing, add it by hand, using the URL from [Updating the docs URL](#updating-the-docs-url):
 
 ```bash
-codex mcp add trilio-site-recovery-kuberentes-docs --url "<docs URL>"
+codex mcp add trilio-site-recovery-kubernetes-docs --url "<docs URL>"
 ```
 
 #### Updating
