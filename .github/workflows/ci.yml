@@ -56,5 +56,5 @@ jobs:
         run: |
           for p in plugins/*/; do python .pluginkit/pluginkit.py package "$p" --out dist; done
 
-      - name: Repo checks (skill content, README, Cursor and Junie marketplaces)
+      - name: Repo checks (names, docs URL, skill content, README)
         run: sh scripts/check.sh

@@ -5,5 +5,3 @@ plugins/*/.codex-plugin/** linguist-generated=true
 plugins/*/.cursor-plugin/** linguist-generated=true
 plugins/*/.mcp.json linguist-generated=true
 plugins/*/mcp.json linguist-generated=true
-plugins/*/mcp/** linguist-generated=true
-plugins/*/extension.json linguist-generated=true

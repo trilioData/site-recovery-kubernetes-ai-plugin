@@ -6,8 +6,6 @@
     ".codex-plugin/plugin.json": "7eabea0dbb344eac58a60636ea31a77d13dbf929ef7df44d65e9d6a1a65cd9fe",
     ".cursor-plugin/plugin.json": "8c352ba84e88d0b3ccd9f0c6d06bd4bbdad038e864c5a3c6b03e5c4adba7dffe",
     ".mcp.json": "981e06bf7ace9814efc8d52641316ef4e87de342beb55bc5fff1ac342bd231ba",
-    "extension.json": "1dcb1c413653ec92885f28f9da5f4bbc2c75bec2d6d884217d85ee400c12390f",
-    "mcp.json": "b658e118697b6d34956f61d5ea79f96fb0eeaf9d5c3a3b64e7bf3aa948a145dd",
-    "mcp/.mcp.json": "6c7e32b5da7f8684f02291e11f24b445c4ececd5fa5506db1b22ad204c9f7dc4"
+    "mcp.json": "b658e118697b6d34956f61d5ea79f96fb0eeaf9d5c3a3b64e7bf3aa948a145dd"
   }
 }

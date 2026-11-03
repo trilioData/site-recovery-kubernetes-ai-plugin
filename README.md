@@ -13,7 +13,7 @@ Workflows cover the TSR setup path. Failover and other day-2 operations aren't s
 
 ## Instructions
 
-The plugin is available for Claude Code, Codex, Cursor and Junie.
+The plugin is available for Claude Code, Codex and Cursor, all from the [Trilio marketplace](https://github.com/trilioData/trilio-agent-marketplace).
 
 ### Claude Code
 
@@ -84,58 +84,20 @@ codex plugin add site-recovery-kubernetes@trilio
 
 #### Installation
 
-Cursor installs from this repository until the Trilio marketplace covers Cursor.
-
-1. Add this repository as a marketplace by running the following command in a terminal:
+1. Add the Trilio marketplace by running the following command in a terminal:
 ```
-cursor-agent plugin marketplace add https://github.com/trilioData/site-recovery-kubernetes-ai-plugin
+cursor-agent plugin marketplace add https://github.com/trilioData/trilio-agent-marketplace
 ```
 
-2. Install the plugin with the `/plugins` command inside a Cursor session.
+2. Install the `site-recovery-kubernetes` plugin with the `/plugins` command inside a Cursor session.
 
 #### Updating
 
 ```bash
-cursor-agent plugin marketplace update trilio-cursor-marketplace
+cursor-agent plugin marketplace update trilio
 ```
 
 Reopen Cursor. If the plugin is still on the previous version, reinstall it with the `/plugins` command.
-
-### Junie
-
-#### Installation
-
-Run the following commands inside a Junie CLI session.
-
-Junie installs from this repository until the Trilio marketplace covers Junie.
-
-1. Add this repository as a marketplace:
-```
-/extensions marketplace add trilioData/site-recovery-kubernetes-ai-plugin
-```
-
-2. Install the extension:
-```
-/extensions install site-recovery-kubernetes
-```
-
-If Junie doesn't list the `trilio-site-recovery-docs` MCP server after installing, add it by hand to `.junie/mcp/mcp.json` in your project (or `~/.junie/mcp/mcp.json` for all projects), using the URL from [Updating the docs URL](#updating-the-docs-url):
-
-```json
-{
-  "mcpServers": {
-    "trilio-site-recovery-docs": {
-      "url": "<docs URL>"
-    }
-  }
-}
-```
-
-#### Updating
-
-```
-/extensions update site-recovery-kubernetes
-```
 
 ## Updating the docs URL
 
@@ -148,7 +110,7 @@ https://docs-tsr.trilio.io/api/mcp/mark-reid/trilio-site-recovery-for-kubernetes
 If this URL changes:
 
 1. Update `mcpServers` in `plugins/site-recovery-kubernetes/plugin.yaml`, `DOCS_URL` in `scripts/check.sh`, and this section.
-2. Bump the version and regenerate, as in [CONTRIBUTING.md](CONTRIBUTING.md#changing-manifests-or-releasing-a-version). `pluginkit generate` rewrites the MCP file for each agent: `.mcp.json` (Claude Code and Cursor), `mcp.json` (Codex) and `mcp/.mcp.json` (Junie).
+2. Bump the version and regenerate, as in [CONTRIBUTING.md](CONTRIBUTING.md#changing-manifests-or-releasing-a-version). `pluginkit generate` rewrites the MCP file for each agent: `.mcp.json` (Claude Code and Cursor) and `mcp.json` (Codex).
 
 ## Development
 
@@ -159,7 +121,7 @@ git clone git@github.com:trilioData/trilio-agent-plugin-kit.git .pluginkit -b v0
 pip install pyyaml
 python .pluginkit/pluginkit.py generate .    # after editing plugin.yaml or the skill
 python .pluginkit/pluginkit.py validate .
-sh scripts/check.sh                          # skill, README and marketplace checks; needs jq
+sh scripts/check.sh                          # skill and README checks; needs jq
 CHECK_ONLINE=1 sh scripts/check.sh           # also confirms the docs MCP server responds
 ```
 

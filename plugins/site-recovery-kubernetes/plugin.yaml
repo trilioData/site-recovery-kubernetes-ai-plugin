@@ -1,12 +1,11 @@
 # Portable plugin source. `pluginkit generate` turns this into the files
-# Claude Code, Codex, Cursor and Junie each expect. Edit this, not those.
+# Claude Code, Codex and Cursor each expect. Edit this, not those.
 name: site-recovery-kubernetes
 displayName: Trilio Site Recovery
 version: 0.2.0
 description: Helps coding agents set up and operate Trilio Site Recovery for Kubernetes.
 descriptions:
   claude-code: Helps Claude Code set up and operate Trilio Site Recovery for Kubernetes, grounded in the official docs.
-  junie: Helps Junie set up and operate Trilio Site Recovery for Kubernetes.
 author:
   name: Trilio
 homepage: https://github.com/trilioData/site-recovery-kubernetes-ai-plugin
@@ -15,7 +14,7 @@ license: Apache-2.0
 keywords: [trilio, site-recovery, kubernetes, disaster-recovery, failover]
 category: Developer Tools
 
-targets: [claude-code, codex, cursor, junie]
+targets: [claude-code, codex, cursor]
 
 # The official TSR docs, generated from the TSR source. If this URL changes,
 # see "Updating the docs URL" in the README.

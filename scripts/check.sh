@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 # Checks what pluginkit doesn't: the generated files carry the right names,
-# version and docs MCP URL, the Cursor and Junie marketplaces point at the
-# plugin, and the skill and README carry the rules they must.
+# version and docs MCP URL, and the skill and README carry the rules they must.
+# (pluginkit validate rejects marketplace files in this repo: every agent
+# installs from trilio-agent-marketplace.)
 #
 # Run from the repo root:
 #   sh scripts/check.sh                  # offline checks
@@ -50,11 +51,11 @@ expect() {
 }
 
 check_manifests() {
-	for f in $(find .cursor-plugin .junie-extension plugins -name '*.json' 2>/dev/null); do
+	for f in $(find plugins -name '*.json' 2>/dev/null); do
 		jq empty "$f" 2>/dev/null || fail "$f: invalid JSON"
 	done
 
-	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json $P/extension.json; do
+	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json; do
 		expect "$f" .name "$PLUGIN_NAME"
 	done
 	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json; do
@@ -63,19 +64,6 @@ check_manifests() {
 	done
 	expect $P/.cursor-plugin/plugin.json .mcpServers ./.mcp.json
 	expect $P/.codex-plugin/plugin.json .mcpServers ./mcp.json
-
-	# Claude Code and Codex install from trilio-agent-marketplace. Cursor and
-	# Junie install from this repo until that catalog covers them.
-	expect .cursor-plugin/marketplace.json .name trilio-cursor-marketplace
-	expect .cursor-plugin/marketplace.json '.plugins | length' 1
-	expect .cursor-plugin/marketplace.json '.plugins[0].name' "$PLUGIN_NAME"
-	expect .cursor-plugin/marketplace.json '.plugins[0].source' "./$P"
-
-	expect .junie-extension/marketplace.json .name trilio-junie-marketplace
-	expect .junie-extension/marketplace.json '.extensions | length' 1
-	expect .junie-extension/marketplace.json '.extensions[0].name' "$PLUGIN_NAME"
-	expect .junie-extension/marketplace.json '.extensions[0].source' "./$P"
-	expect .junie-extension/marketplace.json '.extensions[0].version' "$VERSION"
 
 	if command -v claude >/dev/null 2>&1; then
 		for target in "$P"; do
@@ -95,7 +83,7 @@ $out"
 # and URL.
 check_mcp() {
 	server=".mcpServers[\"$MCP_SERVER\"]"
-	for f in $P/.mcp.json $P/mcp.json $P/mcp/.mcp.json; do
+	for f in $P/.mcp.json $P/mcp.json; do
 		expect "$f" '.mcpServers | length' 1
 		expect "$f" "$server.url" "$DOCS_URL"
 	done
@@ -204,7 +192,7 @@ check_docs() {
 	else
 		fail "README shows the docs URL $count times, want 1"
 	fi
-	for heading in "Claude Code" Codex Cursor Junie "Updating the docs URL"; do
+	for heading in "Claude Code" Codex Cursor "Updating the docs URL"; do
 		if grep -qx "### $heading\|## $heading" README.md 2>/dev/null; then
 			ok "README has '$heading'"
 		else
@@ -212,9 +200,9 @@ check_docs() {
 		fi
 	done
 
-	# Codex and Junie bundled-MCP support is unverified, so the README gives a
-	# manual fallback for each.
-	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add" ".junie/mcp/mcp.json"
+	# Codex bundled-MCP support is unverified, so the README gives a manual
+	# fallback.
+	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add"
 
 	expect_text LICENSE "$(cat LICENSE 2>/dev/null)" "Apache License" "Version 2.0"
 	expect_text CHANGELOG.md "$(cat CHANGELOG.md 2>/dev/null)" "## 0.1.0"
