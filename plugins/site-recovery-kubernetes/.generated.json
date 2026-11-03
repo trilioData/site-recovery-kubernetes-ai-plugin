@@ -2,10 +2,10 @@
   "generator": "trilio-agent-plugin-kit 0.1.0",
   "note": "Generated from plugin.yaml. Do not edit these files by hand; run pluginkit generate.",
   "files": {
-    ".claude-plugin/plugin.json": "1e417f349980e5233dc139619309da6a6b1cbbaa47c5307f7a1c7e6e3e86d228",
-    ".codex-plugin/plugin.json": "7eabea0dbb344eac58a60636ea31a77d13dbf929ef7df44d65e9d6a1a65cd9fe",
-    ".cursor-plugin/plugin.json": "8c352ba84e88d0b3ccd9f0c6d06bd4bbdad038e864c5a3c6b03e5c4adba7dffe",
-    ".mcp.json": "981e06bf7ace9814efc8d52641316ef4e87de342beb55bc5fff1ac342bd231ba",
-    "mcp.json": "b658e118697b6d34956f61d5ea79f96fb0eeaf9d5c3a3b64e7bf3aa948a145dd"
+    ".claude-plugin/plugin.json": "fc0d760e9206071fed5fb6bfc3bfca71e99441e8dd50946736068f125e97ce03",
+    ".codex-plugin/plugin.json": "5a6910bdf0fd33b50c8159d9c110a289e9f92ce38dddff94e892a77e84ebaaa7",
+    ".cursor-plugin/plugin.json": "06749b497dbef01c11b124a5f4a3a1aafb56806afe7fc2cb946809407cf048a1",
+    ".mcp.json": "aff53876cd6cc621ae48a1b2f1c96f1a37afe4caf968d180ac6e4ab76d269a5f",
+    "mcp.json": "a6ae8a3ed323025f8507053ea43fff0d18cbe0c8b8fd9bd45a8cdae992c6cffb"
   }
 }

@@ -3,7 +3,8 @@
   "version": "0.2.0",
   "description": "Helps Claude Code set up and operate Trilio Site Recovery for Kubernetes, grounded in the official docs.",
   "author": {
-    "name": "Trilio"
+    "name": "Trilio",
+    "email": "support@trilio.io"
   },
   "homepage": "https://github.com/trilioData/site-recovery-kubernetes-ai-plugin",
   "repository": "https://github.com/trilioData/site-recovery-kubernetes-ai-plugin",

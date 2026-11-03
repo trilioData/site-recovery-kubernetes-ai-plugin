@@ -39,7 +39,7 @@ cases:
 
   - id: docs-unavailable
     prompt: Which fields does a ProtectionGroup spec have?
-    setup: the trilio-site-recovery-docs MCP server is unavailable or returns errors
+    setup: the trilio-site-recovery-kuberentes-docs MCP server is unavailable or returns errors
     expect:
       - tells the user the TSR docs are unavailable
       - does not list ProtectionGroup fields from memory

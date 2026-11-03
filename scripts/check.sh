@@ -12,8 +12,8 @@ set -u
 PLUGIN_NAME="site-recovery-kubernetes"
 VERSION="0.2.0"
 P="plugins/$PLUGIN_NAME"
-MCP_SERVER="trilio-site-recovery-docs"
-DOCS_URL="https://docs-tsr.trilio.io/api/mcp/mark-reid/trilio-site-recovery-for-kubernetes"
+MCP_SERVER="trilio-site-recovery-kuberentes-docs"
+DOCS_URL="https://docs-tsr.trilio.io/api/mcp/trilio-site-recovery-for-kubernetes"
 
 failures=0
 
