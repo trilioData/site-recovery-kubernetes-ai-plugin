@@ -70,11 +70,10 @@ The version must match everywhere. When you bump it:
 
 1. Update `version` in `plugins/site-recovery-kubernetes/plugin.yaml` and run `python .pluginkit/pluginkit.py generate .`, which updates every agent's manifest.
 2. Update `VERSION` in `scripts/check.sh`.
-3. Add an entry at the top of `CHANGELOG.md`.
 
 This repo has no marketplace files, and `pluginkit validate` fails if one is added. Claude Code, Codex and Cursor all install from [trilio-agent-marketplace](https://github.com/trilioData/trilio-agent-marketplace).
 
-To release, tag the merged commit `site-recovery-kubernetes/v<version>` and push the tag. The release workflow checks the tag against `plugin.yaml` and publishes a GitHub release; the platform group then pins the tag in trilio-agent-marketplace.
+To release, tag the merged commit `site-recovery-kubernetes/v<version>` and push the tag. The release workflow checks the tag against `plugin.yaml` and publishes a GitHub release whose notes list the pull requests since the previous release. If the release changes something users must act on, such as the install id, a skill name or the docs MCP server, add that to the top of the release notes. The platform group then pins the tag in trilio-agent-marketplace.
 
 If the docs MCP URL changes, follow [Updating the docs URL](README.md#updating-the-docs-url) in the README.
 

@@ -57,4 +57,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" dist/*.zip \
             --title "${{ steps.tag.outputs.name }} ${{ steps.tag.outputs.version }}" \
+            --generate-notes \
             --notes "Built with trilio-agent-plugin-kit $KIT_REF. Add it to trilio-agent-marketplace with: pluginkit pin . ${{ steps.tag.outputs.name }} $GITHUB_REF_NAME"

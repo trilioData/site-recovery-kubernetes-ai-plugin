@@ -205,7 +205,6 @@ check_docs() {
 	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add"
 
 	expect_text LICENSE "$(cat LICENSE 2>/dev/null)" "Apache License" "Version 2.0"
-	expect_text CHANGELOG.md "$(cat CHANGELOG.md 2>/dev/null)" "## 0.1.0"
 }
 
 check_manifests
