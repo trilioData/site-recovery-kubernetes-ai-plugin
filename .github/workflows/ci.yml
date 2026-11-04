@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  KIT_REF: v0.1.0  # kit pin: keep equal in release.yml
+  KIT_REF: 0.1.0  # kit pin: keep equal in release.yml
 
 jobs:
   check:
@@ -36,7 +36,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PLUGINKIT_TOKEN }}
         run: |
-          newer=$(git -C .pluginkit ls-remote --tags --refs origin 'v*' \
+          newer=$(git -C .pluginkit ls-remote --tags --refs origin 'refs/tags/[0-9]*' \
             | sed 's#.*refs/tags/##' | sort -V | awk -v cur="$KIT_REF" 'f{n++} $0==cur{f=1} END{print n+0}')
           if [ "$newer" -ge 2 ]; then
             echo "::warning::Kit pin $KIT_REF is $newer releases behind. Bump KIT_REF in ci.yml and release.yml."

@@ -1,16 +1,16 @@
-# Runs on a tag such as site-recovery-kubernetes/v0.2.0: checks the tag matches
+# Runs on a tag such as site-recovery-kubernetes/0.2.0: checks the tag matches
 # plugin.yaml, builds the generic-agent zip and publishes a GitHub release.
 name: release
 
 on:
   push:
-    tags: ["*/v*"]
+    tags: ["*/[0-9]*"]
 
 permissions:
   contents: write
 
 env:
-  KIT_REF: v0.1.0  # kit pin: keep equal in ci.yml
+  KIT_REF: 0.1.0  # kit pin: keep equal in ci.yml
 
 jobs:
   release:
@@ -35,8 +35,8 @@ jobs:
         id: tag
         run: |
           tag="${GITHUB_REF_NAME}"
-          name="${tag%/v*}"
-          version="${tag##*/v}"
+          name="${tag%/*}"
+          version="${tag##*/}"
           if [ ! -f "plugins/$name/plugin.yaml" ]; then
             echo "::error::Tag $tag does not match a folder under plugins/"; exit 1
           fi

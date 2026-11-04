@@ -26,7 +26,7 @@ The plugin's source is `plugin.yaml` plus its skills. [trilio-agent-plugin-kit](
 You need Python 3.9+, `jq`, and access to the kit repo. The [Claude Code](https://claude.com/product/claude-code) CLI is optional; `scripts/check.sh` also runs `claude plugin validate` when it's installed.
 
 ```bash
-git clone git@github.com:trilioData/trilio-agent-plugin-kit.git .pluginkit -b v0.1.0   # git-ignored
+git clone git@github.com:trilioData/trilio-agent-plugin-kit.git .pluginkit -b 0.1.0   # git-ignored
 python3 -m pip install pyyaml
 ```
 
@@ -91,7 +91,7 @@ The version must match everywhere. When you bump it:
 
 This repo has no marketplace files, and `pluginkit validate` fails if one is added. Claude Code, Codex and Cursor all install from [trilio-agent-marketplace](https://github.com/trilioData/trilio-agent-marketplace).
 
-To release, tag the merged commit `site-recovery-kubernetes/v<version>` and push the tag. The release workflow checks the tag against `plugin.yaml` and publishes a GitHub release whose notes list the pull requests since the previous release. If the release changes something users must act on, such as the install id, a skill name or the docs MCP server, add that to the top of the release notes. The platform group then pins the tag in trilio-agent-marketplace.
+To release, tag the merged commit `site-recovery-kubernetes/<version>` and push the tag. The release workflow checks the tag against `plugin.yaml` and publishes a GitHub release whose notes list the pull requests since the previous release. If the release changes something users must act on, such as the install id, a skill name or the docs MCP server, add that to the top of the release notes. The platform group then pins the tag in trilio-agent-marketplace.
 
 ## Updating the docs URL
 
