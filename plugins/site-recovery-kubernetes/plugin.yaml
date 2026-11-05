@@ -2,7 +2,7 @@
 # Claude Code, Codex and Cursor each expect. Edit this, not those.
 name: site-recovery-kubernetes
 displayName: Trilio Site Recovery
-version: 0.2.0
+version: 0.1.0
 description: Helps coding agents set up and operate Trilio Site Recovery for Kubernetes.
 descriptions:
   claude-code: Helps Claude Code set up and operate Trilio Site Recovery for Kubernetes, grounded in the official docs.
