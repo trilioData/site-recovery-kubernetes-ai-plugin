@@ -1,16 +1,19 @@
 #!/usr/bin/env sh
-# Checks the invariants that tie the plugin's files together: names, versions,
-# the docs MCP URL, and the rules the skill must carry.
+# Checks what pluginkit doesn't: the generated files carry the right names,
+# version and docs MCP URL, and the skill and README carry the rules they must.
+# (pluginkit validate rejects marketplace files in this repo: every agent
+# installs from trilio-agent-marketplace.)
 #
 # Run from the repo root:
 #   sh scripts/check.sh                  # offline checks
 #   CHECK_ONLINE=1 sh scripts/check.sh   # also probes the docs MCP server
 set -u
 
-PLUGIN_NAME="trilio-site-recovery"
+PLUGIN_NAME="site-recovery-kubernetes"
 VERSION="0.1.0"
-MCP_SERVER="trilio-site-recovery-docs"
-DOCS_URL="https://docs-tsr.trilio.io/api/mcp/mark-reid/trilio-site-recovery-for-kubernetes"
+P="plugins/$PLUGIN_NAME"
+MCP_SERVER="trilio-site-recovery-kubernetes-docs"
+DOCS_URL="https://docs-tsr.trilio.io/api/mcp/trilio-site-recovery-for-kubernetes"
 
 failures=0
 
@@ -48,41 +51,22 @@ expect() {
 }
 
 check_manifests() {
-	for f in $(find .claude-plugin .cursor-plugin .agents .junie-extension plugin -name '*.json' 2>/dev/null); do
+	for f in $(find plugins -name '*.json' 2>/dev/null); do
 		jq empty "$f" 2>/dev/null || fail "$f: invalid JSON"
 	done
 
-	for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json plugin/.cursor-plugin/plugin.json plugin/extension.json; do
+	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json; do
 		expect "$f" .name "$PLUGIN_NAME"
 	done
-	for f in plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json plugin/.cursor-plugin/plugin.json; do
+	for f in $P/.claude-plugin/plugin.json $P/.codex-plugin/plugin.json $P/.cursor-plugin/plugin.json; do
 		expect "$f" .version "$VERSION"
 		expect "$f" .skills ./skills/
 	done
-	expect plugin/.cursor-plugin/plugin.json .mcpServers ./.mcp.json
-	expect plugin/.codex-plugin/plugin.json .mcpServers ./mcp.json
-
-	expect .claude-plugin/marketplace.json .name trilio-claude-marketplace
-	expect .cursor-plugin/marketplace.json .name trilio-cursor-marketplace
-	for f in .claude-plugin/marketplace.json .cursor-plugin/marketplace.json; do
-		expect "$f" '.plugins | length' 1
-		expect "$f" '.plugins[0].name' "$PLUGIN_NAME"
-		expect "$f" '.plugins[0].source' ./plugin
-	done
-
-	expect .agents/plugins/marketplace.json .name trilio-codex-marketplace
-	expect .agents/plugins/marketplace.json '.plugins | length' 1
-	expect .agents/plugins/marketplace.json '.plugins[0].name' "$PLUGIN_NAME"
-	expect .agents/plugins/marketplace.json '.plugins[0].source.path' ./plugin
-
-	expect .junie-extension/marketplace.json .name trilio-junie-marketplace
-	expect .junie-extension/marketplace.json '.extensions | length' 1
-	expect .junie-extension/marketplace.json '.extensions[0].name' "$PLUGIN_NAME"
-	expect .junie-extension/marketplace.json '.extensions[0].source' ./plugin
-	expect .junie-extension/marketplace.json '.extensions[0].version' "$VERSION"
+	expect $P/.cursor-plugin/plugin.json .mcpServers ./.mcp.json
+	expect $P/.codex-plugin/plugin.json .mcpServers ./mcp.json
 
 	if command -v claude >/dev/null 2>&1; then
-		for target in . plugin; do
+		for target in "$P"; do
 			if out=$(claude plugin validate "$target" 2>&1); then
 				ok "claude plugin validate $target"
 			else
@@ -99,13 +83,13 @@ $out"
 # and URL.
 check_mcp() {
 	server=".mcpServers[\"$MCP_SERVER\"]"
-	for f in plugin/.mcp.json plugin/mcp.json plugin/mcp/.mcp.json; do
+	for f in $P/.mcp.json $P/mcp.json; do
 		expect "$f" '.mcpServers | length' 1
 		expect "$f" "$server.url" "$DOCS_URL"
 	done
-	expect plugin/.mcp.json "$server.type" http
-	expect plugin/mcp.json '."$schema"' https://agent-plugins.org/schemas/1.0.0/mcp.schema.json
-	expect plugin/mcp.json "$server.type" streamable-http
+	expect $P/.mcp.json "$server.type" http
+	expect $P/mcp.json '."$schema"' https://agent-plugins.org/schemas/1.0.0/mcp.schema.json
+	expect $P/mcp.json "$server.type" streamable-http
 
 	if [ "${CHECK_ONLINE:-}" = 1 ]; then
 		tools=$(curl -s -m 30 -X POST "$DOCS_URL" \
@@ -121,7 +105,7 @@ check_mcp() {
 	fi
 }
 
-SKILL=plugin/skills/tsr-guide/SKILL.md
+SKILL=$P/skills/tsr-guide/SKILL.md
 
 # frontmatter KEY prints the value of KEY from the skill's frontmatter.
 frontmatter() {
@@ -200,28 +184,32 @@ check_skill() {
 }
 
 check_docs() {
-	# The README shows the URL in exactly one place, so a URL change has a
-	# single spot to edit there.
+	# The README shows the URL in exactly one place (the Codex fallback), so a
+	# URL change has a single spot to edit there.
 	count=$(grep -oF "$DOCS_URL" README.md 2>/dev/null | wc -l | tr -d ' ')
 	if [ "$count" = 1 ]; then
 		ok "README shows the docs URL once"
 	else
 		fail "README shows the docs URL $count times, want 1"
 	fi
-	for heading in "Claude Code" Codex Cursor Junie "Updating the docs URL"; do
+	for heading in "Claude Code" Codex Cursor; do
 		if grep -qx "### $heading\|## $heading" README.md 2>/dev/null; then
 			ok "README has '$heading'"
 		else
 			fail "README lacks a '$heading' section"
 		fi
 	done
+	if grep -qx "## Updating the docs URL" CONTRIBUTING.md 2>/dev/null; then
+		ok "CONTRIBUTING has 'Updating the docs URL'"
+	else
+		fail "CONTRIBUTING lacks an 'Updating the docs URL' section"
+	fi
 
-	# Codex and Junie bundled-MCP support is unverified, so the README gives a
-	# manual fallback for each.
-	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add" ".junie/mcp/mcp.json"
+	# Codex bundled-MCP support is unverified, so the README gives a manual
+	# fallback.
+	expect_text README.md "$(cat README.md 2>/dev/null)" "codex mcp add trilio-site-recovery-kubernetes-docs --url $DOCS_URL"
 
 	expect_text LICENSE "$(cat LICENSE 2>/dev/null)" "Apache License" "Version 2.0"
-	expect_text CHANGELOG.md "$(cat CHANGELOG.md 2>/dev/null)" "## 0.1.0"
 }
 
 check_manifests

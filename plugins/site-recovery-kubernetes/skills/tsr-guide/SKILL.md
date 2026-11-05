@@ -9,7 +9,7 @@ Help the user plan, install, understand and troubleshoot Trilio Site Recovery fo
 
 ## Docs first
 
-The `trilio-site-recovery-docs` MCP server serves the official TSR documentation, generated from the TSR source. It provides three tools:
+The `trilio-site-recovery-kubernetes-docs` MCP server serves the official TSR documentation, generated from the TSR source. It provides three tools:
 
 - `list_pages` returns the table of contents. Call it first to orient yourself in an unfamiliar area.
 - `search_docs` finds the sections relevant to a query.
